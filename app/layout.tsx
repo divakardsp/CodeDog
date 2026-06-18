@@ -50,6 +50,8 @@ export default function RootLayout({
                         defaultTheme="dark"
                         enableSystem
                         disableTransitionOnChange
+                        themes={["light", "dark"]}
+                        storageKey="app-theme"
                     >
                         {children}
                     </ThemeProvider>

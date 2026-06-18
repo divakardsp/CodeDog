@@ -1,4 +1,5 @@
 import { ModeToggle } from "@/components/ui/mode-toggle";
+import { UserMenuWithSession } from "@/features/auth/components/user-menu";
 import Image from "next/image";
 
 export default function Home() {
@@ -61,6 +62,7 @@ export default function Home() {
           </a>
         </div>
       </main>
+
     </div>
   );
 }
