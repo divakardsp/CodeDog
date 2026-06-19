@@ -26,6 +26,7 @@ export function DashboardSidebar({
     user,
     plan = "Pro",
 }: DashboardSidebarProps) {
+  console.log("Reaching sidebar")
     return (
         <Sidebar collapsible="icon">
             <SidebarHeader>

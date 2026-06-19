@@ -10,6 +10,7 @@ type DashboardShellProps = {
 };
 
 export function DashboardShell({ children, user, plan }: DashboardShellProps) {
+    console.log("Reaching shell")
     return (
         <TooltipProvider>
             <SidebarProvider>

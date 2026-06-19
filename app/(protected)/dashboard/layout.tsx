@@ -7,7 +7,7 @@ export default async function DashboardLayout({
     children: React.ReactNode;
 }) {
     const session = await requireAuth();
-
+    console.log("Reaching layout")
     return (
         <DashboardShell user={session.user} plan="Pro">
             {children}

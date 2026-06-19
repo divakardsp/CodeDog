@@ -9,6 +9,7 @@ type SidebarUserButtonProps = {
 };
 
 export function SidebarUserButton({ user, plan }: SidebarUserButtonProps) {
+    console.log("Reaching")
     return (
         <SidebarMenu>
             <SidebarMenuItem>

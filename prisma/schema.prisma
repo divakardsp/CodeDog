@@ -12,9 +12,7 @@ datasource db {
   provider = "postgresql"
 }
 
-model Test {
-  id String @id @default(cuid())
-}
+
 
 model User {
   id            String    @id
@@ -26,6 +24,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  githubInstallation  GithubInstallation?
 
   @@unique([email])
   @@map("user")
@@ -78,3 +77,18 @@ model Verification {
   @@index([identifier])
   @@map("verification")
 }
+
+
+model GithubInstallation {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  installationId Int // GitHub's numeric installation id — passed to app.getInstallationOctokit()
+  accountLogin   String?
+  accountType    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("github_installation")
+}
+
