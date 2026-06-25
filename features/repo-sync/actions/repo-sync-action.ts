@@ -1,3 +1,5 @@
+"use server"
+
 import { getServerSession } from "@/features/auth/actions";
 import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
 import { getUserInstallationId } from "@/features/github/server/installation";

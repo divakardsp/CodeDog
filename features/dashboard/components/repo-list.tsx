@@ -10,6 +10,7 @@ import { statusBadge } from "../lib/status-style";
 import { formatDistanceToNow } from "date-fns";
 import { DashboardRepo } from "../lib/types";
 import { LockIcon, LockKeyholeOpen, StarIcon } from "lucide-react";
+import SyncRepoButton from "@/features/repo-sync/components/sync-repo-button";
 
 type Filter = "all" | "public" | "private";
 
@@ -233,11 +234,11 @@ function RepoRow({ repo }: { repo: DashboardRepo }) {
                 })}
             </TableCell>
             <TableCell className="text-right">
-                {/* <SyncRepoButton
+                <SyncRepoButton
                     repoFullName={repo.fullName}
                     branch={repo.defaultBranch}
                     syncStatus={repo.syncStatus ?? null}
-                /> */}
+                />
             </TableCell>
         </TableRow>
     );
