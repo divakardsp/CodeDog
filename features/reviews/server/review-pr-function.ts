@@ -3,19 +3,24 @@ import { prisma } from "@/lib/db";
 import { getPullRequestFiles } from "./pr-files";
 import { chunkPrFiles } from "../utils/chunk-codes";
 import { generateReview } from "./generate-review";
-
-
+import {
+    buildPrNamespace,
+    saveChunksToPinecone,
+    searchPrContext,
+} from "./vector";
+import { buildRepoNamespace } from "@/features/repo-sync/server/repo-sync";
+import { postPrComment } from "./post-pr-comments";
 
 export const reviewPullRequest = inngest.createFunction(
-    {id: "review-pull-request", triggers: {event: "github/pr-recieved"}},
-    async ({event, step}) => {
-        const pullRequestId = event.data.pullRequestId
+    { id: "review-pull-request", triggers: { event: "github/pr-recieved" } },
+    async ({ event, step }) => {
+        const pullRequestId = event.data.pullRequestId;
 
         const pullRequest = await step.run("mark-processing", async () => {
             return prisma.pullRequest.update({
-                where: {id: pullRequestId},
-                data: {status: "processing"}
-            })
+                where: { id: pullRequestId },
+                data: { status: "processing" },
+            });
         });
 
         const chunks = await step.run("chunking-data", async () => {
@@ -23,34 +28,90 @@ export const reviewPullRequest = inngest.createFunction(
                 pullRequest.installationId,
                 pullRequest.repoFullName,
                 pullRequest.prNumber,
-            )
+            );
 
             return chunkPrFiles(pullRequest.prNumber, files);
-        })
+        });
 
-        if(chunks.length === 0){
-            await step.run("mark-reviewed", async() => {
+        if (chunks.length === 0) {
+            await step.run("mark-reviewed", async () => {
                 await prisma.pullRequest.update({
-                    where: {id: pullRequestId},
-                    data: {status: "reviewed"}
-                })
-            })
+                    where: { id: pullRequestId },
+                    data: { status: "reviewed" },
+                });
+            });
 
-            return { pullRequestId, status: "reviewed", reason: "no code to review" };
+            return {
+                pullRequestId,
+                status: "reviewed",
+                reason: "no code to review",
+            };
         }
 
-        //TODO: add for pineconeDB
+        const namespace = buildPrNamespace(
+            pullRequest.repoFullName,
+            pullRequest.prNumber,
+        );
 
-        await step.sleep("wait-for-vectors-to-index", "10s")
+        await step.run("save-vectors-to-pinecone", async () => {
+            await saveChunksToPinecone(namespace, chunks);
+        });
+
+        await step.sleep("wait-for-vectors-to-index", "10s");
 
         //TODO: add repoContextSnippets
 
+        const repoContextSnippets = await step.run(
+            "search-repo-context",
+            async () => {
+                const repoSync = await prisma.repoSync.findUnique({
+                    where: { repoFullName: pullRequest.repoFullName },
+                });
+
+                if (!repoSync || repoSync.status !== "synced") {
+                    return [];
+                }
+
+                const repoNamespace = buildRepoNamespace(
+                    pullRequest.repoFullName,
+                );
+                return searchPrContext(repoNamespace, pullRequest.title);
+            },
+        );
+
         const review = await step.run("generate-ai-review", async () => {
+            const contextSnippets = await searchPrContext(
+                namespace,
+                pullRequest.title,
+            );
             return generateReview({
                 repoFullName: pullRequest.repoFullName,
                 title: pullRequest.title,
-                
-            })
-        })
-    }
-)
+                contextSnippets,
+                repoContextSnippets,
+            });
+        });
+
+        await step.run("post-pr-comment", async () => {
+            await postPrComment(
+                pullRequest.installationId,
+                pullRequest.repoFullName,
+                pullRequest.prNumber,
+                review,
+            );
+        });
+
+        await step.run("mark-reviewed", async () => {
+            await prisma.pullRequest.update({
+                where: { id: pullRequestId },
+                data: {
+                    status: "reviewed",
+                    reviewComment: review,
+                    reviewedAt: new Date(),
+                },
+            });
+        });
+
+        return { pullRequestId, status: "reviewed" };
+    },
+);

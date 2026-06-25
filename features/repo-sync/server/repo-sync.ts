@@ -182,6 +182,6 @@ export async function triggerRepoSync(
 
     await inngest.send({
         name: "repo/sync.requested",
-        data: { repoSyncID: repoSync.id },
+        data: { repoSyncId: repoSync.id },
     });
 }

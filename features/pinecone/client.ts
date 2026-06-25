@@ -1,11 +1,23 @@
-import {Pinecone} from "@pinecone-database/pinecone";
+import { Pinecone } from "@pinecone-database/pinecone";
 
-let pinecone : Pinecone | null = null;
+let pinecone: Pinecone | null = null;
 
-export function getPineconeIndex(){
-    if(!pinecone){
-        pinecone = new Pinecone({apiKey: process.env.PINECONE_API_KEY!})
+export function getPineconeIndex() {
+    const indexName = process.env.PINECONE_INDEX;
+
+    if (!indexName) {
+        throw new Error("PINECONE_INDEX is not set");
     }
 
-    return pinecone.index({name: process.env.PINCONE_INDEX!});
+    if (!pinecone) {
+        const apiKey = process.env.PINECONE_API_KEY;
+
+        if (!apiKey) {
+            throw new Error("PINECONE_API_KEY is not set");
+        }
+
+        pinecone = new Pinecone({ apiKey });
+    }
+
+    return pinecone.index(indexName);
 }
