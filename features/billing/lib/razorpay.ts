@@ -6,7 +6,7 @@ let razorpay : Razorpay | null = null
 export function getRazorpay(){
     if(!razorpay){
         razorpay = new Razorpay({
-            key_id: process.env.RAZORPAY_TEST_KEY_ID,
+            key_id: process.env.NEXT_PUBLIC_RAZORPAY_TEST_KEY_ID,
             key_secret: process.env.RAZORPAY_TEST_KEY_SECRET
         })
     }
