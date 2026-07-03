@@ -12,7 +12,7 @@ import { buildRepoNamespace } from "@/features/repo-sync/server/repo-sync";
 import { postPrComment } from "./post-pr-comments";
 
 export const reviewPullRequest = inngest.createFunction(
-    { id: "review-pull-request", triggers: { event: "github/pr-recieved" } },
+    { id: "review-pull-request", triggers: { event: "github/pr-received" } },
     async ({ event, step }) => {
         const pullRequestId = event.data.pullRequestId;
 
