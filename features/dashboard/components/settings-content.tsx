@@ -213,7 +213,7 @@ function SubscriptionTab({
     );
 }
 
-export function SettingContent({
+export function SettingsContent({
     profile,
     subscription,
     usage,
