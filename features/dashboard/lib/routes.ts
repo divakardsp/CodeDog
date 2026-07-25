@@ -10,19 +10,10 @@ export type DashboardRoute =
     (typeof DASHBOARD_ROUTES)[keyof typeof DASHBOARD_ROUTES];
 
 export const DASHBOARD_NAV_ITEMS = [
-    {
-        title: "Overview",
-        href: DASHBOARD_ROUTES.overview,
-        icon: "layout-dashboard" as const,
-    },
+  
     {
         title: "Repositories",
         href: DASHBOARD_ROUTES.repos,
-        icon: "folder-git-2" as const,
-    },
-    {
-        title: "PullRequests",
-        href: DASHBOARD_ROUTES.pullRequest,
         icon: "folder-git-2" as const,
     },
     {
